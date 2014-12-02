@@ -37,13 +37,14 @@ namespace TesseractForNetDemo
       if (strSelectImgFile.Length < 1) return;
       try
       {
-        using (var engine = new TesseractEngine(@"./tessdata", "chi_sim", EngineMode.Default))
+        using (var engine = new TesseractEngine(@"./tessdata", "normal", EngineMode.Default))
         {
           using (var img = Pix.LoadFromFile(strSelectImgFile))
           {
             using (var page = engine.Process(img))
             {
               var text = page.GetText();
+
             }
           }
         }
