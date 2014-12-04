@@ -106,7 +106,7 @@ namespace TesseractForNetDemo
         Marshal.Copy(buff, 0, ptr, length);
         bmpNew.UnlockBits(data);
         bmpNew = Crop(bmpNew);
-      //  bmpNew.Save(  , System.Drawing.Imaging.ImageFormat.Png);
+      //  bmpNew.Save(  , System.Drawing.Imaging.ImageFormat.Png);  'delete
     }
 
     private Bitmap Crop(Bitmap bitmap) 
