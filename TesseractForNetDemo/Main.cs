@@ -112,7 +112,7 @@ namespace TesseractForNetDemo
     private Bitmap Crop(Bitmap bitmap) 
     {
         Rectangle rec = new Rectangle(10, 10,2395, 1600);
-        return bitmap.Clone(rec, System.Drawing.Imaging.PixelFormat.Format32bppArgb); // add by dc
+        return bitmap.Clone(rec, System.Drawing.Imaging.PixelFormat.Format32bppArgb); 
     }
    
   }
