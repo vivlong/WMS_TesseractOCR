@@ -106,7 +106,7 @@ namespace TesseractForNetDemo
                 if (buff[i - 1] >= 230 && buff[i - 2] >= 230 && buff[i - 3] >= 230)
                 {
                     buff[i] = 0;
-                    if ((i / data.Stride) > 500)  //用于预防图片顶部为白色。
+                    if ((i / data.Stride) > 500)  //用于预防图片顶部为白色。   
                     {
                         intRemove = i;
                     }
