@@ -9,12 +9,16 @@ using System.Windows.Forms;
 using Tesseract;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 namespace TesseractForNetDemo
 {
   public partial class Main : Form
   {
     private string strSelectImgFile = "";
     private Bitmap bmpNew=null;
+    private Bitmap bmpScan = null;
     public Main()
     {
       InitializeComponent();
@@ -50,7 +54,7 @@ namespace TesseractForNetDemo
             using (var page = engine.Process(img))
             {
               var text = page.GetText();
-
+              MessageBox.Show(text, "");
             }
           }
         }
@@ -87,33 +91,93 @@ namespace TesseractForNetDemo
 
     private void RemoveWhite(string strFileName)
     {
-        bmpNew = new Bitmap(Image.FromFile(strFileName), Image.FromFile(strFileName).Size);
+        bmpScan = new Bitmap(Image.FromFile(strFileName), Image.FromFile(strFileName).Size);
+        bmpNew = bmpScan;
         BitmapData data = bmpNew.LockBits(new Rectangle(0, 0, bmpNew.Width, bmpNew.Height), ImageLockMode.ReadWrite, bmpNew.PixelFormat);
         int length = data.Stride * data.Height;
         IntPtr ptr = data.Scan0;
         byte[] buff = new byte[length];
         Marshal.Copy(ptr, buff, 0, length);
-        for (int i = length-1; i >2; i -= 4)
+        int intRemove = 0;
+        for (int i = length - 1; i > 2; i -= 4)
         {
             if (i >= 3)
             {
                 if (buff[i - 1] >= 230 && buff[i - 2] >= 230 && buff[i - 3] >= 230)
                 {
                     buff[i] = 0;
-                }
+                    if ((i / data.Stride) > 500)  //用于预防图片顶部为白色。   
+                    {
+                        intRemove = i;
+                    }
+                }               
             }
         }
         Marshal.Copy(buff, 0, ptr, length);
         bmpNew.UnlockBits(data);
-        bmpNew = Crop(bmpNew);
-      //  bmpNew.Save(  , System.Drawing.Imaging.ImageFormat.Png);  'delete
+        int intHeight=(int)(intRemove / data.Stride);
+        bmpNew = GetPicThumbnail(bmpNew, (int)((panel2.Width - 30) * (double)((double)intHeight / (double)bmpNew.Width)), (panel2.Width - 30),  System.Drawing.Imaging.PixelFormat.Format32bppArgb, intHeight);
     }
 
-    private Bitmap Crop(Bitmap bitmap) 
+    public Bitmap GetPicThumbnail(Bitmap iSource, int dHeight, int dWidth, System.Drawing.Imaging.PixelFormat flag, int initHeight)
     {
-        Rectangle rec = new Rectangle(10, 10,2395, 1600);
-        return bitmap.Clone(rec, System.Drawing.Imaging.PixelFormat.Format32bppArgb); 
+        System.Drawing.Image initImage = iSource;
+
+        //原图宽高均小于模版，不作处理，直接保存
+        if (initImage.Width <= dWidth && initImage.Height <= dHeight)
+        {
+            return iSource;
+        }
+        else
+        {
+            //原始图片的宽 
+            int initWidth = initImage.Width;
+            //截图对象
+                System.Drawing.Image pickedImage = null;
+                System.Drawing.Graphics pickedG = null;
+
+                pickedImage = new System.Drawing.Bitmap(initWidth, initHeight);
+                pickedG = System.Drawing.Graphics.FromImage(pickedImage);
+                //设置质量
+                pickedG.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                pickedG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                //定位
+                Rectangle fromR = new Rectangle(0, 0, initWidth, initHeight);
+                Rectangle toR = new Rectangle(0, 0, initWidth, initHeight);
+                //画图
+                pickedG.DrawImage(initImage, toR, fromR, System.Drawing.GraphicsUnit.Pixel);
+           
+                //将截图对象赋给原图
+                initImage = (System.Drawing.Image)pickedImage.Clone();
+                //释放截图资源
+                pickedG.Dispose();
+                pickedImage.Dispose();
+
+            //缩略图对象
+            System.Drawing.Image resultImage = new System.Drawing.Bitmap(dWidth, dHeight);
+            System.Drawing.Graphics resultG = System.Drawing.Graphics.FromImage(resultImage);
+            //设置质量
+            resultG.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            resultG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            //用指定背景色清空画布
+            resultG.Clear(Color.White);
+            //绘制缩略图
+            resultG.DrawImage(initImage, new System.Drawing.Rectangle(0, 0, dWidth, dHeight), new System.Drawing.Rectangle(0, 0, initWidth, initHeight), System.Drawing.GraphicsUnit.Pixel);
+            //关键质量控制
+            //获取系统编码类型数组,包含了jpeg,bmp,png,gif,tiff
+            ImageCodecInfo[] icis = ImageCodecInfo.GetImageEncoders();
+            ImageCodecInfo ici = null;
+            foreach (ImageCodecInfo i in icis)
+            {
+                if (i.MimeType == "image/jpeg" || i.MimeType == "image/bmp" || i.MimeType == "image/png" || i.MimeType == "image/gif")
+                {
+                    ici = i;
+                }
+            }
+            EncoderParameters ep = new EncoderParameters(1);
+            ep.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)flag);
+           return (Bitmap) resultImage ;
+        }        
     }
-   
   }
 }
