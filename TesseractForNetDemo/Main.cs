@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
+using System.Collections;
 using Tesseract;
 
 namespace TesseractForNetDemo
@@ -43,8 +45,13 @@ namespace TesseractForNetDemo
           {
             using (var page = engine.Process(img))
             {
-              var text = page.GetText();
-
+              string text = page.GetText();
+              ArrayList strlist = splittext(text);
+              for (int I = 0; I < strlist.Count; I++)
+              {
+                
+                //strlist[I].ToString().i
+              }
             }
           }
         }
@@ -53,6 +60,44 @@ namespace TesseractForNetDemo
       {
         MessageBox.Show(ex.Message);
       }
+    }
+
+    private ArrayList splittext(string text)
+    {
+      ArrayList allstr = new ArrayList();
+      string[] strnn = Regex.Split(text, "\n\n", RegexOptions.IgnoreCase);
+      foreach (string strs in strnn)
+      {
+        string temp = strs.Replace(": ", ":").Replace(" :",":").Trim();
+        string[] strn = Regex.Split(temp, "\n", RegexOptions.IgnoreCase);
+        if (strn.Length > 1)
+        {
+          foreach (string str in strn)
+          {
+            Regex rgx = new Regex(@"[\u4e00-\u9fa5]*[:]\S*", RegexOptions.IgnoreCase);
+            MatchCollection mc = rgx.Matches(str);
+            if (mc.Count>0)
+            {
+              foreach (Match ma in mc)
+              {
+                if(ma.Success)
+                {
+                  allstr.Add(ma.Value.ToString());
+                }
+              }
+            }
+            else
+            {
+              allstr.Add(str);
+            }
+          }
+        }
+        else if (temp.Length > 2)
+        {
+          allstr.Add(temp);
+        }
+      }
+      return allstr;
     }
 
     private void Main_Load(object sender, EventArgs e)
