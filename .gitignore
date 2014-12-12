@@ -1,5 +1,7 @@
 /TesseractForNetDemo/bin
 /TesseractForNetDemo/obj
+/AutoUpdate/bin
+/AutoUpdate/obj
 packages/EntityFramework.5.0.0/Content/App.config.transform
 packages/EntityFramework.5.0.0/Content/Web.config.transform
 packages/EntityFramework.5.0.0/EntityFramework.5.0.0.nupkg

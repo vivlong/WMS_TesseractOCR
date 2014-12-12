@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="gb2312"?>
+<AutoUpdater>
+  <description>Application autoUpdate</description>
+  <Updater>
+	<Url>http://apps.sysfreight.net/Tools/</Url>
+	<LastUpdateTime>2014-12-11</LastUpdateTime>
+  </Updater>
+  <Application applicationId="DeveloperTools">
+    <EntryPoint>DeveloperTools.exe</EntryPoint>
+    <Location>.</Location>
+    <Version>1.0.0.0</Version>
+  </Application>
+  <Files>
+	   <File Ver="1.0.0.0" Name="DeveloperTools.exe"/>
+  </Files>
+</AutoUpdater>
