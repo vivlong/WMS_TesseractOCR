@@ -27,8 +27,8 @@ namespace TesseractForNetDemo
     private void btn_1_Click(object sender, EventArgs e)
     {
       OpenFileDialog openFileDialog1 = new OpenFileDialog();
-      openFileDialog1.InitialDirectory = Application.StartupPath;
-      openFileDialog1.Filter = "TIF files(*.tif)|*.tif|PNG files(*.png)|*.png";
+     // openFileDialog1.InitialDirectory = Application.StartupPath;
+      openFileDialog1.Filter = "JPG files(*.jpg)|*.jpg|TIF files(*.tif)|*.tif|PNG files(*.png)|*.png";
       openFileDialog1.RestoreDirectory = true;
       if (openFileDialog1.ShowDialog() == DialogResult.OK)
       {
@@ -99,27 +99,79 @@ namespace TesseractForNetDemo
         byte[] buff = new byte[length];
         Marshal.Copy(ptr, buff, 0, length);
         int intRemove = 0;
+        int intTopRemove = 0;
         for (int i = length - 1; i > 2; i -= 4)
         {
             if (i >= 3)
             {
-                if (buff[i - 1] >= 230 && buff[i - 2] >= 230 && buff[i - 3] >= 230)
+                if (buff[i - 1] >= 255 && buff[i - 2] >= 255 && buff[i - 3] >= 255)
                 {
                     buff[i] = 0;
-                    if ((i / data.Stride) > 500)  //用于预防图片顶部为白色。   
                     {
+                        int intOldHeight = (int)(intRemove / data.Stride);
+                        int intOldRemove = intRemove;
                         intRemove = i;
+                        if (intOldHeight > 0)
+                        {
+                            int intNewHeight = (int)(intRemove / data.Stride);
+                            if (intOldHeight - intNewHeight > 2)
+                            {
+                                intRemove = intOldRemove;
+                                break;
+                            }                        
+                        }
+                        if (bmpNew.Height - ((int)(intRemove / data.Stride)) > 2 && intOldRemove == 0)
+                        {
+                        intRemove=0;
+                        break;
+                        }
+                    }                   
+                }
+           }
+        }
+        for (int i = 3; i < length; i += 4)
+        {
+            if (i >= 3)
+            {
+                if (buff[i - 1] >= 255 && buff[i - 2] >= 255 && buff[i - 3] >= 255)
+                {
+                    buff[i] = 0;
+                    {
+                        int intOldHeight = (int)(intTopRemove / data.Stride);
+                        int intOldRemove = intTopRemove;
+                        intTopRemove = i;
+                        if (intOldHeight > 0)
+                        {
+                            int intNewHeight = (int)(intTopRemove / data.Stride);
+                            if (intNewHeight-intOldHeight > 2)
+                            {
+                                intTopRemove = intOldRemove;
+                            }
+                        }
+                        if ((int)(intTopRemove / data.Stride) > 2 && intOldRemove==0)
+                        {
+                            intTopRemove = 0;
+                            break;
+                        }
                     }
-                }               
+                }
             }
         }
         Marshal.Copy(buff, 0, ptr, length);
         bmpNew.UnlockBits(data);
         int intHeight=(int)(intRemove / data.Stride);
-        bmpNew = GetPicThumbnail(bmpNew, (int)((panel2.Width - 30) * (double)((double)intHeight / (double)bmpNew.Width)), (panel2.Width - 30),  System.Drawing.Imaging.PixelFormat.Format32bppArgb, intHeight);
+        int intTop = (int)(intTopRemove / data.Stride);
+        if (intRemove == 0)
+        {
+            intHeight = bmpNew.Height;
+        }
+        intHeight = intHeight - intTop;
+        if (intTop > 10) { intTop = intTop -2; }
+        intHeight = intHeight + 25;
+        bmpNew = GetPicThumbnail(bmpNew, (int)((panel2.Width - 30) * (double)((double)intHeight / (double)bmpNew.Width)), (panel2.Width - 30), System.Drawing.Imaging.PixelFormat.Format32bppArgb, intHeight, intTop);
     }
 
-    public Bitmap GetPicThumbnail(Bitmap iSource, int dHeight, int dWidth, System.Drawing.Imaging.PixelFormat flag, int initHeight)
+    public Bitmap GetPicThumbnail(Bitmap iSource, int dHeight, int dWidth, System.Drawing.Imaging.PixelFormat flag, int initHeight,int intFromTop)
     {
         System.Drawing.Image initImage = iSource;
 
@@ -142,7 +194,7 @@ namespace TesseractForNetDemo
                 pickedG.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 pickedG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 //定位
-                Rectangle fromR = new Rectangle(0, 0, initWidth, initHeight);
+                Rectangle fromR = new Rectangle(0, intFromTop, initWidth, initHeight);
                 Rectangle toR = new Rectangle(0, 0, initWidth, initHeight);
                 //画图
                 pickedG.DrawImage(initImage, toR, fromR, System.Drawing.GraphicsUnit.Pixel);
