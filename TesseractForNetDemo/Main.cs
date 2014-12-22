@@ -214,6 +214,21 @@ namespace TesseractForNetDemo
         if (intTop > 10) { intTop = intTop -2; }
         intHeight = intHeight + 25;
         bmpNew = GetPicThumbnail(bmpNew, (int)((panel2.Width - 30) * (double)((double)intHeight / (double)bmpNew.Width)), (panel2.Width - 30), System.Drawing.Imaging.PixelFormat.Format32bppArgb, intHeight, intTop);
+        bmpNew = GetGrayBitmap(bmpNew);
+    }
+
+    private Bitmap GetGrayBitmap(Bitmap bmp)
+    {
+        for (int x = 0; x < bmp.Width; x++)
+        {
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                Color color = bmp.GetPixel(x, y);
+                int gray = (color.R + color.G + color.B) / 3;
+                bmp.SetPixel(x, y, Color.FromArgb(gray, gray, gray));
+            }
+        }
+        return bmp;
     }
 
     public Bitmap GetPicThumbnail(Bitmap iSource, int dHeight, int dWidth, System.Drawing.Imaging.PixelFormat flag, int initHeight,int intFromTop)
