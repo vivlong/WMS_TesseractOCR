@@ -135,7 +135,9 @@
     <Compile Include="XmlFiles.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Content Include="UpdateList.xml" />
+    <Content Include="UpdateList.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="FrmUpdate.resx">
       <DependentUpon>FrmUpdate.cs</DependentUpon>
       <SubType>Designer</SubType>
