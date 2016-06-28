@@ -54,12 +54,27 @@ namespace TesseractForNetDemo
             using (var page = engine.Process(img))
             {
               string text = page.GetText();
-              ArrayList strlist = splittext(text);
+              ArrayList strlist = splittext(text);                
+              ArrayList strlistNew = new ArrayList();
               for (int I = 0; I < strlist.Count; I++)
               {
-                
-                //strlist[I].ToString().i
+                  string strTmp = strlist[I].ToString().Substring(strlist[I].ToString().IndexOf(":") + 1);
+                  strlistNew.Add(strTmp);
               }
+              cbo_1.Text = strlistNew[2].ToString();
+              dtp_2.Text = strlistNew[3].ToString();
+              txt_3.Text = strlistNew[18].ToString();
+              cbo_4.Text = strlistNew[4].ToString();
+              cbo_5.Text = strlistNew[5].ToString();
+              cbo_6.Text = strlistNew[19].ToString();
+              cbo_7.Text = strlistNew[6].ToString();
+              cbo_8.Text = strlistNew[17].ToString();
+              //dtp_9.Text = strlistNew[20].ToString();
+              cbo_10.Text = strlistNew[7].ToString();
+              cbo_11.Text = strlistNew[8].ToString();
+              cbo_12.Text = strlistNew[22].ToString();
+              cbo_13.Text = strlistNew[9].ToString();
+              cbo_14.Text = strlistNew[10].ToString();
             }
           }
         }
